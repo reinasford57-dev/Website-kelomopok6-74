@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jawab Soal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #16213e;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        h2 { text-align: center; margin-bottom: 20px; }
+        .soal-card {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .opsi {
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            background: #1a1a4e;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .opsi input { margin-right: 10px; }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .info { text-align: center; color: #aaa; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📝 Jawab Soal</h2>
+        <p class="info" id="userInfo"></p>
+        <div id="quizContainer">Memuat soal...</div>
+        <button onclick="kirimJawaban()">📤 Kirim Jawaban</button>
+    </div>
+
+    <script>
+        // ========== KONFIGURASI GITHUB (GANTI INI) ==========
+        const GITHUB_USERNAME = 'reinasford57';  // ← GANTI
+        const REPO_NAME = 'kelomopok6-74';              // ← GANTI
+        const BRANCH = 'main';                           // atau 'master'
+        const SOAL_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH}/soal.json`;
+        // ===================================================
+
+        let soalData = [];
+
+        // Cek akses client
+        if (localStorage.getItem('userRole') !== 'client') {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('userInfo').textContent = 
+            `Halo, ${localStorage.getItem('userName') || 'Anonim'}!`;
+
+        async function ambilSoalDariGitHub() {
+            const container = document.getElementById('quizContainer');
+            try {
+                const res = await fetch(SOAL_URL);
+                if (!res.ok) throw new Error('Gagal memuat soal');
+                soalData = await res.json();
+                // Simpan juga ke localStorage sebagai cache
+                localStorage.setItem('soalKuis', JSON.stringify(soalData));
+            } catch (err) {
+                // Fallback ke localStorage jika offline atau URL salah
+                soalData = JSON.parse(localStorage.getItem('soalKuis') || '[]');
+                if (soalData.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;">Belum ada soal. Silakan hubungi admin.</p>';
+                    return;
+                }
+            }
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            if (soalData.length === 0) {
+                container.innerHTML = '<p style="text-align:center;">Belum ada soal.</p>';
+                return;
+            }
+            container.innerHTML = soalData.map((s, i) => `
+                <div class="soal-card">
+                    <p><strong>Soal #${i + 1}</strong></p>
+                    <p>${s.pertanyaan}</p>
+                    <label class="opsi">
+                        <input type="radio" name="soal${i}" value="A"> A. ${s.opsi.A}
+                    </label>
+                    <label class="opsi">
+                        <input type="radio" name="soal${i}" value="B"> B. ${s.opsi.B}
+                    </label>
+                    <label class="opsi">
+                        <input type="radio" name="soal${i}" value="C"> C. ${s.opsi.C}
+                    </label>
+                    <label class="opsi">
+                        <input type="radio" name="soal${i}" value="D"> D. ${s.opsi.D}
+                    </label>
+                </div>
+            `).join('');
+        }
+
+        function kirimJawaban() {
+            let jawabanUser = [];
+            for (let i = 0; i < soalData.length; i++) {
+                const selected = document.querySelector(`input[name="soal${i}"]:checked`);
+                jawabanUser.push(selected ? selected.value : null);
+            }
+
+            if (jawabanUser.some(j => j === null)) {
+                if (!confirm('Ada soal yang belum dijawab. Tetap kirim?')) return;
+            }
+
+            const hasil = JSON.parse(localStorage.getItem('hasilKuis') || '[]');
+            hasil.push({
+                nama: localStorage.getItem('userName') || 'Anonim',
+                jawaban: jawabanUser,
+                waktu: new Date().toLocaleString()
+            });
+            localStorage.setItem('hasilKuis', JSON.stringify(hasil));
+
+            alert('✅ Jawaban berhasil dikirim!');
+            // Optional: redirect ke halaman stats jika ada
+            // window.location.href = 'stats.html';
+        }
+
+        // Jalankan saat halaman dimuat
+        ambilSoalDariGitHub();
+    </script>
+</body>
+</html>
