@@ -1,0 +1,52 @@
+[
+  {
+    "pertanyaan": "Apa warna air di rumah mu?",
+    "opsi": {
+      "A": "Jernih",
+      "B": "Agak keruh",
+      "C": "Keruh",
+      "D": ""
+    },
+    "jawaban": ""
+  },
+  {
+    "pertanyaan": "Apakah air berbau?",
+    "opsi": {
+      "A": "Ya",
+      "B": "Tidak",
+      "C": "",
+      "D": ""
+    },
+    "jawaban": ""
+  },
+  {
+    "pertanyaan": "Apakah pernah ada endapan atau kotoran",
+    "opsi": {
+      "A": "Ya",
+      "B": "Kadang",
+      "C": "Tidak",
+      "D": ""
+    },
+    "jawaban": ""
+  },
+  {
+    "pertanyaan": "Apakah air aman langsung diminum?",
+    "opsi": {
+      "A": "Ya",
+      "B": "Dimasak dulu",
+      "C": "Tidak",
+      "D": ""
+    },
+    "jawaban": ""
+  },
+  {
+    "pertanyaan": "Skala kejernihan air dari 1-5(1=sangat keruh 5=sangat jernih",
+    "opsi": {
+      "A": "1",
+      "B": "2",
+      "C": "3",
+      "D": "4-5"
+    },
+    "jawaban": ""
+  }
+]
