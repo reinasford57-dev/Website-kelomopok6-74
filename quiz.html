@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jawab Soal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #16213e; padding: 20px; border-radius: 15px; }
+        h2 { text-align: center; margin-bottom: 20px; }
+        .soal-card { background: #0f3460; padding: 20px; border-radius: 10px; margin: 15px 0; }
+        .opsi { display: block; padding: 10px; margin: 5px 0; background: #1a1a4e; border-radius: 8px; cursor: pointer; }
+        .opsi input { margin-right: 10px; }
+        button { width: 100%; padding: 12px; background: #e94560; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 15px; }
+        .info { text-align: center; color: #aaa; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="titleQuiz">📝 Jawab Soal</h2>
+        <p class="info" id="userInfo"></p>
+        <div id="quizContainer"></div>
+        <button id="btnKirim" onclick="kirimJawaban()">📤 Kirim Jawaban</button>
+    </div>
+
+    <script>
+        // Cek login
+        if (!localStorage.getItem('userName')) { window.location.href = 'index.html'; }
+
+        document.getElementById('userInfo').textContent = `Halo, ${localStorage.getItem('userName')}!`;
+
+        function getSoal() { return JSON.parse(localStorage.getItem('soalKuis') || '[]'); }
+
+        function renderQuiz() {
+            const soal = getSoal();
+            const container = document.getElementById('quizContainer');
+            if (soal.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:50px;">Belum ada soal yang tersedia dari Admin.</p>';
+                document.getElementById('btnKirim').style.display = 'none';
+                return;
+            }
+            container.innerHTML = soal.map((s, i) => `
+                <div class="soal-card">
+                    <p><strong>Soal #${i+1}</strong></p>
+                    <p style="margin-bottom:10px;">${s.pertanyaan}</p>
+                    ${s.opsi.A ? `<label class="opsi"><input type="radio" name="soal${i}" value="A"> A. ${s.opsi.A}</label>` : ''}
+                    ${s.opsi.B ? `<label class="opsi"><input type="radio" name="soal${i}" value="B"> B. ${s.opsi.B}</label>` : ''}
+                    ${s.opsi.C ? `<label class="opsi"><input type="radio" name="soal${i}" value="C"> C. ${s.opsi.C}</label>` : ''}
+                    ${s.opsi.D ? `<label class="opsi"><input type="radio" name="soal${i}" value="D"> D. ${s.opsi.D}</label>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function kirimJawaban() {
+            const soal = getSoal();
+            let jawabanUser = [];
+            for (let i = 0; i < soal.length; i++) {
+                const selected = document.querySelector(`input[name="soal${i}"]:checked`);
+                jawabanUser.push(selected ? selected.value : null);
+            }
+            
+            if (jawabanUser.some(j => j === null)) {
+                if (!confirm('Ada soal yang belum dijawab. Tetap kirim?')) return;
+            }
+
+            const hasil = JSON.parse(localStorage.getItem('hasilKuis') || '[]');
+            hasil.push({
+                nama: localStorage.getItem('userName'),
+                jawaban: jawabanUser,
+                waktu: new Date().toLocaleString()
+            });
+            localStorage.setItem('hasilKuis', JSON.stringify(hasil));
+            alert('✅ Jawaban berhasil dikirim!');
+            window.location.href = 'index.html';
+        }
+
+        renderQuiz();
+    </script>
+</body>
+</html>
